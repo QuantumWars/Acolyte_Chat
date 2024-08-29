@@ -14,7 +14,7 @@ const direc = tmpdir()
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const API_KEY = process.env.GOOGLE_API_KEY;
 
@@ -30,7 +30,6 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(express.static('public'));
 
 const embeddingModel = new GoogleGenerativeAIEmbeddings({
   apiKey: API_KEY,
@@ -162,7 +161,7 @@ app.post('/query', async (req, res) => {
     let vectorStore = vectorStoreCache.get(modelID);
     if (!vectorStore) {
       console.log(`Loading vector store for model: ${modelID}...`);
-      vectorStore = await FaissStore.load(path.join(__dirname,`${modelID}`), embeddingModel);
+      vectorStore = await FaissStore.load(`${modelID}`, embeddingModel);
       vectorStoreCache.set(modelID, vectorStore);
       console.log("Vector store loaded and cached successfully.");
     }
