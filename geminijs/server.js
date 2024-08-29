@@ -8,6 +8,7 @@ import { LLMChain } from "langchain/chains";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { tmpdir } from 'os';
+import path from 'path';
 const direc = tmpdir()
 dotenv.config();
 
@@ -28,7 +29,7 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, 'public')));
 
 const embeddingModel = new GoogleGenerativeAIEmbeddings({
   apiKey: API_KEY,
