@@ -20,8 +20,8 @@
     "faiss-node": "^0.5.1",
     "langchain": "^0.2.16",
     "nodemon": "^3.1.4",
-    "pickleparser": "^0.2.1"
+    "pickleparser": "^0.2.1",
+    "vercel": "^37.2.1"
   },
-  "devDependencies": {},
   "description": ""
 }
