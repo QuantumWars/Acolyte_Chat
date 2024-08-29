@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import './Sidebar.css';
 import { Menu, Plus, CircleHelp, Settings, History, Database } from 'lucide-react';
-import { Context } from "../../context/context";
+import { Context } from "../../context/Context.jsx";
 
 const Sidebar = () => {
     const [extended, setExtended] = useState(false);
