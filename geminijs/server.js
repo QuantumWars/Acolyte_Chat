@@ -20,7 +20,12 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://acolyte-frontend.vercel.app/",
+    credentials: true
+  })
+);
 app.use(express.json());
 
 const embeddingModel = new GoogleGenerativeAIEmbeddings({
