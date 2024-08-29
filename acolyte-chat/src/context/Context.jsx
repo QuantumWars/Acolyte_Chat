@@ -67,7 +67,7 @@ const ContextProvider = (props) => {
             console.log("Sending chat request with input:", input, "model:", modelToUse, "and sessionId:", sessionId);
             
             // API call with session ID
-            const response = await fetch('http://localhost:3000/query', {
+            const response = await fetch('https://acolyte-chat.vercel.app/query', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
