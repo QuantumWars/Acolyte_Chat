@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef } from "react";
 import { Compass, SendHorizontal, Book, Microscope, Stethoscope } from 'lucide-react'
 import Notebook from '../../assets/notebook-tabs.png'
 import './Main.css'
-import { Context } from "../../context/context";
+import { Context } from "../../context/Context.jsx";
 
 const Main = () => {
     const { 
