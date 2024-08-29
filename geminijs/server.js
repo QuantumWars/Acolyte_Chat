@@ -29,9 +29,7 @@ app.use(
     credentials: true
   })
 );
-const __dirname = path.dirname(__filename);
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
 const embeddingModel = new GoogleGenerativeAIEmbeddings({
   apiKey: API_KEY,
@@ -163,7 +161,7 @@ app.post('/query', async (req, res) => {
     let vectorStore = vectorStoreCache.get(modelID);
     if (!vectorStore) {
       console.log(`Loading vector store for model: ${modelID}...`);
-      vectorStore = await FaissStore.load(`${direc}/public/${modelID}`, embeddingModel);
+      vectorStore = await FaissStore.load(`/public/${modelID}`, embeddingModel);
       vectorStoreCache.set(modelID, vectorStore);
       console.log("Vector store loaded and cached successfully.");
     }
