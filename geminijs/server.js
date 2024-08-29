@@ -7,7 +7,8 @@ import { ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings } from '@langchain
 import { LLMChain } from "langchain/chains";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-
+import { tmpdir } from 'os';
+const direc = tmpdir()
 dotenv.config();
 
 const app = express();
@@ -159,7 +160,7 @@ app.post('/query', async (req, res) => {
     let vectorStore = vectorStoreCache.get(modelID);
     if (!vectorStore) {
       console.log(`Loading vector store for model: ${modelID}...`);
-      vectorStore = await FaissStore.load(`./public/${modelID}`, embeddingModel);
+      vectorStore = await FaissStore.load(`${direc}/public/${modelID}`, embeddingModel);
       vectorStoreCache.set(modelID, vectorStore);
       console.log("Vector store loaded and cached successfully.");
     }
