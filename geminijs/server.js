@@ -27,6 +27,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(express.static("public"));
 
 const embeddingModel = new GoogleGenerativeAIEmbeddings({
   apiKey: API_KEY,
