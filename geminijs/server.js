@@ -9,6 +9,7 @@ import { PromptTemplate } from "@langchain/core/prompts";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { tmpdir } from 'os';
 import path from 'path';
+import { fileURLToPath } from 'url';
 const direc = tmpdir()
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use(
     credentials: true
   })
 );
+const __dirname = path.dirname(__filename);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
