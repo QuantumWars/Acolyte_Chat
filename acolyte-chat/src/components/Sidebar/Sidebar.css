@@ -1,0 +1,177 @@
+/* Medical Student Sidebar with Centered Icons and RAG Models CSS */
+
+:root {
+    --sidebar-bg: #f0f7ff;
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --text-color: #2c3e50;
+    --hover-color: #e8f6fd;
+    --icon-size: 24px;
+}
+.paper-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.paper-info {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.open-pdf-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.open-pdf-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+}
+.sidebar {
+    min-height: 100vh;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: var(--sidebar-bg);
+    padding: 25px 15px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    animation: slideIn 0.5s ease-out;
+    width: 60px; /* Default collapsed width */
+}
+
+.sidebar.extended {
+    width: 250px; /* Extended width */
+}
+
+.sidebar .menu {
+    display: flex;
+    justify-content: center;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    margin: 10px auto;
+    cursor: pointer;
+    color: var(--primary-color);
+    transition: transform 0.3s ease;
+}
+
+.sidebar .menu:hover {
+    transform: scale(1.1);
+}
+
+.sidebar .new-chat {
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    background-color: var(--primary-color);
+    border-radius: 25px;
+    font-size: 14px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sidebar .new-chat:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.sidebar .section {
+    margin-top: 30px;
+}
+
+.sidebar .section-title {
+    color: var(--text-color);
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+.sidebar .section-title:hover {
+    color: var(--primary-color);
+}
+
+.sidebar .section-content {
+    margin-top: 10px;
+}
+
+.sidebar .recent-entry,
+.sidebar .rag-model-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 50px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sidebar .recent-entry:hover,
+.sidebar .rag-model-entry:hover {
+    background-color: var(--hover-color);
+    transform: translateX(5px);
+}
+
+.sidebar .bottom {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar .bottom-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    cursor: pointer;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.sidebar .bottom-item:hover {
+    color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+/* Icon styles */
+.sidebar svg {
+    width: var(--icon-size);
+    height: var(--icon-size);
+}
+
+/* Text styles for extended sidebar */
+.sidebar.extended .new-chat p,
+.sidebar.extended .recent-entry p,
+.sidebar.extended .rag-model-entry p,
+.sidebar.extended .bottom-item p {
+    display: inline;
+    margin-left: 10px;
+}
+
+.sidebar:not(.extended) .new-chat p,
+.sidebar:not(.extended) .recent-entry p,
+.sidebar:not(.extended) .rag-model-entry p,
+.sidebar:not(.extended) .bottom-item p {
+    display: none;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
