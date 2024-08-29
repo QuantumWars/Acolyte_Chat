@@ -22,7 +22,7 @@ if (!API_KEY) {
 
 app.use(
   cors({
-    origin: "https://acolyte-frontend.vercel.app/",
+    origin: "https://acolyte-frontend.vercel.app",
     credentials: true
   })
 );
