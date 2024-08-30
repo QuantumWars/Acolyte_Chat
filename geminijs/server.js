@@ -1,16 +1,14 @@
-import express from 'express';
+import express, { text } from 'express';
 import cors from 'cors';
 import * as dotenv from 'dotenv'
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { FaissStore } from "@langchain/community/vectorstores/faiss";
 import { ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
-import { LLMChain } from "langchain/chains";
+import { LLMChain, loadSummarizationChain } from "langchain/chains";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { tmpdir } from 'os';
-import path from 'path';
-import { fileURLToPath } from 'url';
-const direc = tmpdir()
+import fs from 'fs/promises';
+
 dotenv.config();
 
 const app = express();
@@ -44,79 +42,33 @@ const queryPromptText = `
 You are an AI assistant specialized in medical knowledge, designed to interact with medical students. Your task is to provide accurate, helpful, and engaging information based on the given context, question, and previous interactions. Please follow these guidelines:
 
 1. Carefully analyze the provided context and previous interactions.
-
 2. Answer the user's question based on the information in the context and previous interactions. Frame your responses in a way that encourages critical thinking and further exploration of the topic.
-
 3. If the context and previous interactions don't contain enough information to fully answer the question, clearly state this limitation. Then, provide the best possible answer with the available information and suggest related topics the student might want to explore.
-
 4. If asked about topics not covered in the context or previous interactions, explain that the specific information isn't in your current dataset. Then, guide the conversation back to related medical topics you can discuss based on the available context.
-
 5. Maintain a professional yet engaging tone, considering that users are medical students seeking to deepen their understanding.
-
 6. Use the previous interactions to build a progressive learning experience, referencing earlier points and building upon them.
-
 7. For follow-up questions, explicitly connect new information to previously discussed concepts to reinforce learning.
-
 8. Provide concise yet comprehensive answers. Use bullet points, numbered lists, or brief explanations of medical processes when appropriate to enhance clarity.
-
 9. When relevant, mention real-world applications of the medical knowledge being discussed to help students connect theory to practice.
-
 10. If there are limitations or uncertainties in the information provided, explain these clearly. Use this as an opportunity to discuss the importance of ongoing research and evidence-based practice in medicine.
-
-11. For non-medical queries, politely explain your role as a medical AI assistant. Then, attempt to relate the query to a relevant medical topic based on the available context. For example:
-    - If asked about a historical event, relate it to medical advancements of that era.
-    - If asked about a celebrity, discuss general health topics that might be relevant to their age group or known health conditions.
-
+11. For non-medical queries, politely explain your role as a medical AI assistant. Then, attempt to relate the query to a relevant medical topic based on the available context.
 12. Occasionally pose thought-provoking questions to the student to encourage deeper engagement with the material.
-
 13. When appropriate, suggest additional resources or areas of study that would complement the topic being discussed.
-
 14. If the query is completely unrelated to the available context, guide the student back by saying something like: "While I don't have information about [unrelated topic], our medical dataset contains interesting information about [related medical topic from context]. Would you like to explore that instead?"
 
-Context: {document_data}
+Context:
+---
+{document_data}
+---
 
-Previous Interactions: {previous_interactions}
+Previous Interactions:
+---
+{previous_interactions}
+---
 
 User's Question: {query}
 
 Please provide your response, keeping in mind the goal of engaging and educating medical students:
-`;
-
-const summarizePromptText = `
-You are an AI assistant specialized in medical knowledge. Your task is to provide a comprehensive summary of the entire content provided. Please follow these guidelines:
-
-1. Carefully analyze all the provided content.
-2. Create a coherent and well-structured summary that covers the main topics and key points from the entire document.
-3. Organize the summary in a logical manner, using headings or sections if appropriate.
-4. Maintain a professional and informative tone throughout the summary.
-5. Aim for a summary length that captures the essence of the content without being overly lengthy.
-6. Highlight any important medical concepts, treatments, or procedures mentioned in the content.
-7. If there are any conflicting or controversial points in the content, make note of them in the summary.
-8. Use bullet points or numbered lists to present key information clearly and concisely.
-
-Content to summarize:
-{document_data}
-
-Please provide your summary:
-`;
-
-const summarizeResponsesPromptText = `
-You are an AI assistant specialized in medical knowledge. Your task is to provide a comprehensive summary of all previous interactions. Please follow these guidelines:
-
-1. Carefully analyze all the provided interactions.
-2. Create a coherent and well-structured summary that covers the main topics and key points from all interactions.
-3. Organize the summary in a logical manner, using headings or sections if appropriate.
-4. Maintain a professional and informative tone throughout the summary.
-5. Aim for a summary length that captures the essence of the interactions without being overly lengthy.
-6. Highlight the progression of the conversation, noting how later interactions build upon earlier ones.
-7. Identify and summarize any recurring themes or topics across multiple interactions.
-8. If there were any corrections or clarifications made in later interactions, make sure to highlight these in the summary.
-9. Use bullet points or numbered lists to present key information clearly and concisely.
-
-Previous Interactions:
-{previous_interactions}
-
-Please provide your summary of all interactions:
 `;
 
 const queryPromptTemplate = new PromptTemplate({
@@ -124,26 +76,78 @@ const queryPromptTemplate = new PromptTemplate({
   template: queryPromptText,
 });
 
-const summarizePromptTemplate = new PromptTemplate({
-  inputVariables: ["document_data"],
-  template: summarizePromptText,
-});
-
-const summarizeResponsesPromptTemplate = new PromptTemplate({
-  inputVariables: ["previous_interactions"],
-  template: summarizeResponsesPromptText,
-});
-
 const queryChain = new LLMChain({ llm: llmModel, prompt: queryPromptTemplate });
-const summarizeChain = new LLMChain({ llm: llmModel, prompt: summarizePromptTemplate });
-const summarizeResponsesChain = new LLMChain({ llm: llmModel, prompt: summarizeResponsesPromptTemplate });
 
-// Cache for vector stores
 const vectorStoreCache = new Map();
-
-// Cache for previous interactions
 const previousInteractionsCache = new Map();
+const fullContentCache = new Map();
 
+async function loadFullContent(modelID) {
+  if (!fullContentCache.has(modelID)) {
+    try {
+      const content = await fs.readFile(`./${modelID}/source.txt`, 'utf-8');
+      fullContentCache.set(modelID, content);
+    } catch (error) {
+      console.error(`Error loading full content for ${modelID}:`, error);
+      throw error;
+    }
+  }
+  return fullContentCache.get(modelID);
+}
+
+const queryAnalysisPrompt = `
+Analyze the given query and determine if it requires full document context or if a partial context would suffice. 
+Consider the following factors:
+1. Does the query ask for overall summary or general understanding of the entire document?
+2. Does the query require comparing or connecting information from different parts of the document?
+3. Is the query about a specific detail that's likely to be found in a small section of the document?
+4. Does the query ask about trends, patterns, or themes throughout the document?
+
+Query: {query}
+
+Based on your analysis, respond with either "FULL" for full document context or "PARTIAL" for partial context. Explain your reasoning briefly.
+
+Response format:
+DECISION: [FULL/PARTIAL]
+REASONING: [Your explanation here]
+`;
+
+const queryAnalysisTemplate = new PromptTemplate({
+  inputVariables: ["query"],
+  template: queryAnalysisPrompt,
+});
+
+const queryAnalysisChain = new LLMChain({ llm: llmModel, prompt: queryAnalysisTemplate });
+
+async function determineQueryScope(query) {
+  const analysis = await queryAnalysisChain.call({ query });
+  const lines = analysis.text.split('\n').map(line => line.trim());
+  
+  let decision = 'PARTIAL'; // Default to PARTIAL if we can't determine
+  let reasoning = '';
+
+  for (const line of lines) {
+    if (line.toLowerCase().includes('decision:')) {
+      const cleanedLine = line.replace(/[*]/g, '').trim(); // Remove asterisks
+      const parts = cleanedLine.split(':');
+      if (parts.length > 1) {
+        const decisionPart = parts[1].trim().toUpperCase();
+        if (decisionPart.includes('FULL')) {
+          decision = 'FULL';
+        } else if (decisionPart.includes('PARTIAL')) {
+          decision = 'PARTIAL';
+        }
+      }
+    } else if (line.toLowerCase().includes('reasoning:')) {
+      reasoning = line.substring(line.toLowerCase().indexOf('reasoning:') + 'reasoning:'.length).trim();
+    }
+  }
+
+  console.log(`Query scope determination: ${decision}`);
+  console.log(`Reasoning: ${reasoning}`);
+
+  return decision === 'FULL';
+}
 app.post('/query', async (req, res) => {
   const { modelID, query, sessionID } = req.body;
 
@@ -152,68 +156,62 @@ app.post('/query', async (req, res) => {
   }
 
   try {
-    // Load or retrieve the vector store from cache
     let vectorStore = vectorStoreCache.get(modelID);
     if (!vectorStore) {
       console.log(`Loading vector store for model: ${modelID}...`);
-      vectorStore = await FaissStore.load(`${modelID}`, embeddingModel);
-      vectorStoreCache.set(modelID, vectorStore);
+      vectorStore = await FaissStore.load(`./${modelID}`, embeddingModel);
+      vectorStoreCache.set(modelID, vectorStore);      
+
       console.log("Vector store loaded and cached successfully.");
     }
 
-    // Retrieve previous interactions for the session
     let previousInteractions = previousInteractionsCache.get(sessionID) || [];
 
     let response;
-    if (query.toLowerCase().includes('summary') || query.toLowerCase().includes('summarize')) {
-      if (query.toLowerCase().includes('responses') || query.toLowerCase().includes('interactions')) {
-        console.log("Generating summary of all previous responses...");
-        const formattedPreviousInteractions = previousInteractions
-          .map((interaction, index) => `${index + 1}. Q: ${interaction.query}\nA: ${interaction.response}`)
-          .join('\n\n');
+    let content;
 
-        response = await summarizeResponsesChain.call({
-          previous_interactions: formattedPreviousInteractions,
-        });
-        console.log("Summary of previous responses generated.");
-      } else {
-        console.log("Generating summary of document content...");
-        const allDocs = await vectorStore.similaritySearch("", 2000);
-        const content = allDocs.map(doc => doc.pageContent).join('\n\n');
+    const requiresFullContent = await determineQueryScope(query);
 
-        response = await summarizeChain.call({
-          document_data: content,
-        });
-        console.log("Summary of document content generated.");
-      }
-    } else {
-      console.log("Performing similarity search...");
-      const similaritySearchResults = await vectorStore.similaritySearch(query, 5);
-      console.log("Similarity search completed.");
-
-      const content = similaritySearchResults.map(doc => doc.pageContent).join('\n\n');
-
-      // Format previous interactions
-      const formattedPreviousInteractions = previousInteractions
-        .map((interaction, index) => `${index + 1}. Q: ${interaction.query}\nA: ${interaction.response}`)
-        .join('\n\n');
-
-      console.log("Running the query LLM chain...");
-      response = await queryChain.call({
-        document_data: content,
-        previous_interactions: formattedPreviousInteractions,
-        query: query,
+    if (requiresFullContent) {
+      console.log("Query requires full content. Retrieving full content for processing...");
+      const similaritySearchResults = await vectorStore.similaritySearch("", 2000);
+      content = similaritySearchResults.map(doc => doc.pageContent).join('\n\n');
+      console.log(content)
+      const textSplitter = new RecursiveCharacterTextSplitter({
+        chunkSize:10000,
+        chunkOverlap:20
       });
-      console.log("Query chain execution completed.");
+      const docs = await textSplitter.createDocuments([content]);
+      const chain = loadSummarizationChain(llmModel, { type: "map_reduce" });
+      response = await chain.invoke({
+        input_documents: docs,
+      });
+    } else {
+      console.log("Query can be answered with partial content. Performing similarity search...");
+      const similaritySearchResults = await vectorStore.similaritySearch(query, 5);
+      content = similaritySearchResults.map(doc => doc.pageContent).join('\n\n');
+      const formattedPreviousInteractions = previousInteractions
+      .map((interaction, index) => `${index + 1}. Q: ${interaction.query}\nA: ${interaction.response}`)
+      .join('\n\n');
 
-      // Update the previous interactions cache
-      previousInteractions.push({ query, response: response.text });
-      // Keep only the last 10 interactions to manage context length
-      if (previousInteractions.length > 10) {
-        previousInteractions = previousInteractions.slice(-10);
-      }
-      previousInteractionsCache.set(sessionID, previousInteractions);
+    console.log("Running the query LLM chain...");
+    response = await queryChain.call({
+      document_data: content,
+      previous_interactions: formattedPreviousInteractions,
+      query: query,
+    });
     }
+
+    console.log("Content retrieved. Length:", content.length);
+
+    
+    console.log("Query chain execution completed.");
+
+    previousInteractions.push({ query, response: response.text });
+    if (previousInteractions.length > 10) {
+      previousInteractions = previousInteractions.slice(-10);
+    }
+    previousInteractionsCache.set(sessionID, previousInteractions);
 
     res.json({ result: response.text });
   } catch (error) {
