@@ -67,7 +67,7 @@ const ContextProvider = (props) => {
             console.log("Sending chat request with input:", input, "model:", modelToUse, "and sessionId:", sessionId);
             
             // API call with session ID
-            const response = await fetch('https://acolytecompanion.onrender.com/query', {
+            const response = await fetch('http://localhost:3000/query', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -90,7 +90,8 @@ const ContextProvider = (props) => {
                 throw new Error("Unexpected response type from API");
             }
 
-            const formattedResponse = data.result.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*/g, '</br>');
+            // Modified formatting: Move bold text to next line and replace other asterisks with line breaks
+            const formattedResponse = data.result.replace(/\*\*(.*?)\*\*/g, '</br><b>$1</b></br>').replace(/\*/g, '</br>');
 
             setChatSessions(prev => ({
                 ...prev,
