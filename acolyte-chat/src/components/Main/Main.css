@@ -73,12 +73,8 @@ body {
 }
 
 @keyframes heartbeat {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 0.3; }
-}
-@keyframes heartbeat {
-    0%, 100% { transform: scaleX(1); }
-    50% { transform: scaleX(0.75); }
+    0%, 100% { opacity: 0.6; transform: scaleX(1); }
+    50% { opacity: 0.3; transform: scaleX(0.75); }
 }
 
 .main-container {
@@ -187,7 +183,7 @@ body {
     opacity: 0.15;
 }
 
-.main .main-bottom {
+.main-bottom {
     position: fixed;
     bottom: 35px;
     left: 50%;
@@ -208,6 +204,10 @@ body {
     border-radius: 25px;
     margin-bottom: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .search-box input {
@@ -219,22 +219,16 @@ body {
     font-size: 1rem;
 }
 
-.bottom-info {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: var(--bottom-info-bg);
-    color: var(--bottom-info-text);
-    text-align: center;
-    padding: 12px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    border-top: 2px solid var(--bottom-info-border);
-    box-shadow: 0 -2px 10px rgba(41, 128, 185, 0.1);
-    transition: all 0.3s ease;
-    z-index: 2;
+.search-box .send-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
 
 .bottom-info:hover {
     background-color: #d6eaf8;
@@ -386,11 +380,17 @@ body {
 /* Responsive adjustments */
 @media (max-width: 1024px) {
     .main-container {
-        padding: 10px 20px;
+        padding: 20px 20px;
     }
     
     .main .cards {
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+    
+    .search-box {
+        max-width: 80%;
+        width: 100%;
+        margin: 0 auto;
     }
 }
 
@@ -398,22 +398,30 @@ body {
     body {
         font-size: 14px;
     }
-
+    
     .main .greet {
         font-size: 2.5rem;
     }
-
+    
     .main .cards {
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 20px;
     }
-
+    
     .search-box {
-        width: 95%;
+        max-width: 90%;
+        padding: 8px 12px;
+        margin: 0 auto;
     }
-
-    .main .main-bottom {
-        padding: 0px 10px;
+    
+    .search-box input {
+        font-size: 0.9rem;
+        width: 100%;
+    }
+    
+     .main-bottom {
+        padding: 20px 10px;
+        padding-left: 60px;
     }
 }
 
@@ -422,32 +430,35 @@ body {
         font-size: 2rem;
         padding: 10px;
     }
-
+    
     .main .cards {
         grid-template-columns: 1fr;
     }
-
+    
     .main .card {
         height: auto;
         min-height: 120px;
     }
-
+    
     .search-box {
+        max-width: 95%;
         padding: 6px 10px;
+        margin: 0 auto;
     }
-
+    
     .search-box input {
         font-size: 0.875rem;
+        width: 100%;
     }
-
+    
     .result-title p {
         font-size: 1rem;
     }
-
+    
     .result-data p {
         font-size: 0.875rem;
     }
-
+    
     .bottom-info {
         font-size: 0.75rem;
         padding: 8px;
