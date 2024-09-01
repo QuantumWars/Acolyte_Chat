@@ -46,6 +46,11 @@ function App() {
         title="Medical AI Study Companion - Disclaimer"
         content={dialogContent}
       />
+       <div className='bottom-info'>
+                <p>
+                    <strong>Waitlist Demo:</strong> Experience the future of medical education. Join our waitlist to be notified when full access becomes available!
+                </p>
+            </div>
     </>
   )
 }
