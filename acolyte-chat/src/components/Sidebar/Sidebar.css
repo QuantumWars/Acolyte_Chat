@@ -8,6 +8,7 @@
     --hover-color: #e8f6fd;
     --icon-size: 24px;
 }
+
 .paper-entry {
     display: flex;
     justify-content: space-between;
@@ -31,13 +32,14 @@
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: 50%;
 }
+
 .sidebar {
     min-height: 100vh;
     display: inline-flex;
     flex-direction: column;
     justify-content: space-between;
     background-color: var(--sidebar-bg);
-    padding: 25px 15px;
+    padding: 25px 15px 50px 15px; /* Added bottom padding */
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     animation: slideIn 0.5s ease-out;
@@ -104,8 +106,7 @@
     margin-top: 10px;
 }
 
-.sidebar .recent-entry,
-.sidebar .rag-model-entry {
+.sidebar .recent-entry, .sidebar .rag-model-entry {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -116,8 +117,7 @@
     transition: all 0.3s ease;
 }
 
-.sidebar .recent-entry:hover,
-.sidebar .rag-model-entry:hover {
+.sidebar .recent-entry:hover, .sidebar .rag-model-entry:hover {
     background-color: var(--hover-color);
     transform: translateX(5px);
 }
@@ -150,17 +150,17 @@
 }
 
 /* Text styles for extended sidebar */
-.sidebar.extended .new-chat p,
-.sidebar.extended .recent-entry p,
-.sidebar.extended .rag-model-entry p,
+.sidebar.extended .new-chat p, 
+.sidebar.extended .recent-entry p, 
+.sidebar.extended .rag-model-entry p, 
 .sidebar.extended .bottom-item p {
     display: inline;
     margin-left: 10px;
 }
 
-.sidebar:not(.extended) .new-chat p,
-.sidebar:not(.extended) .recent-entry p,
-.sidebar:not(.extended) .rag-model-entry p,
+.sidebar:not(.extended) .new-chat p, 
+.sidebar:not(.extended) .recent-entry p, 
+.sidebar:not(.extended) .rag-model-entry p, 
 .sidebar:not(.extended) .bottom-item p {
     display: none;
 }
@@ -173,5 +173,121 @@
     to {
         transform: translateX(0);
         opacity: 1;
+    }
+}
+/* Add this to your existing Sidebar.css file or replace the previous additions */
+
+.rag-model-entry-container {
+    position: relative;
+}
+
+.rag-model-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 50px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.rag-model-entry:hover {
+    background-color: var(--hover-color);
+}
+
+.rag-model-entry p {
+    margin: 0;
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reference-link-icon {
+    color: var(--primary-color);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.reference-link-icon:hover {
+    background-color: var(--hover-color);
+    transform: scale(1.1);
+}
+
+.reference-popup {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    width: 250px;
+    background-color: white;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    margin-left: 10px;
+}
+
+.reference-popup p {
+    margin: 0 0 5px 0;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.reference-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9em;
+    word-break: break-all;
+}
+
+.reference-link:hover {
+    text-decoration: underline;
+}
+
+/* Ensure the popup doesn't appear when sidebar is collapsed */
+.sidebar:not(.extended) .reference-popup {
+    display: none;
+}
+
+/* Update this existing rule in your CSS if needed */
+.sidebar.extended .rag-model-entry p {
+    display: inline;
+    margin-left: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .reference-popup {
+        width: 200px;
+    }
+}
+
+@media (max-width: 992px) {
+    .reference-popup {
+        left: auto;
+        right: 0;
+        top: 100%;
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .reference-popup {
+        width: 180px;
+    }
+}
+
+@media (max-width: 576px) {
+    .reference-popup {
+        width: 160px;
+    }
+    
+    .rag-model-entry p {
+        max-width: 120px;
     }
 }
