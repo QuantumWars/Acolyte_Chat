@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef } from "react";
 import { Compass, SendHorizontal, Book, Microscope, Stethoscope } from 'lucide-react'
 import Notebook from '../../assets/notebook-tabs.png'
 import './Main.css'
-import { Context } from "../../context/Context.jsx";
+import { Context } from "../../context/context";
 
 const Main = () => {
     const { 
@@ -58,18 +58,7 @@ const Main = () => {
             { text: "What role do hypocretin/orexin neurons (HONs) play in arbitrating between eating and exercise behaviors?", icon: Stethoscope },
             { text: "How did HON stimulation affect food vs. wheel choice?", icon: Microscope }
         ],
-        pdf_test2: [
-            { text: "What are the main types of keratinocytic skin cancers and how common are they?", icon: Stethoscope },
-            { text: "What are some key genetic alterations found in basal cell carcinomas?", icon: Microscope },
-            { text: "How Hedgehog signaling pathway led to new targeted therapies for basal cell carcinoma?", icon: Stethoscope },
-            { text: "What role does UV radiation play in the development of cutaneous squamous cell carcinomas?", icon: Microscope }
-        ],
-        pdf_test3: [
-            { text: "What was the purpose of establishing the Intergovernmental Working Group?", icon: Stethoscope },
-            { text: "What are some of the key elements included in the global strategy and plan of action?", icon: Microscope },
-            { text: "Why promote research and development was promoted for diseases that disproportionately affect developing countries?", icon: Stethoscope },
-            { text: "What recommendations does the strategy make regarding intellectual property rights and access to medicines?", icon: Microscope }
-        ]
+        // ... other model cards
     };
 
     const currentCards = modelCards[currentModel] || modelCards.pdf_test1;
@@ -103,7 +92,6 @@ const Main = () => {
                                     <p>{prompt}</p>
                                 </div>
                                 <div className="result-data">
-                                    {/* <img src={Notebook} alt="" /> */}
                                     {index === currentSession.prompts.length - 1 && loading ? (
                                         <div className="loader">
                                             <hr /><hr /><hr />
@@ -117,7 +105,9 @@ const Main = () => {
                     </div>
                 )}
                 
-                <div className="main-bottom">
+                
+            </div>
+            <div className="main-bottom">
                     <div className="search-box">
                         <input 
                             ref={inputRef}
@@ -127,17 +117,12 @@ const Main = () => {
                             type="text" 
                             placeholder="Enter your question" 
                         />
-                        <div onClick={handleSend}>
+                        <button onClick={handleSend} className="send-button">
                             <SendHorizontal />
-                        </div>
+                        </button>
                     </div>
                 </div>
-            </div>
-            <div>
-                <p className="bottom-info">
-                    <strong>Waitlist Demo:</strong> Experience the future of medical education. Join our waitlist to be notified when full access becomes available!
-                </p>
-            </div>
+           
         </div>
     )
 }
