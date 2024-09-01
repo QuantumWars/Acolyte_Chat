@@ -1,13 +1,11 @@
-import express, { text } from 'express';
+import express from 'express';
 import cors from 'cors';
 import * as dotenv from 'dotenv'
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { FaissStore } from "@langchain/community/vectorstores/faiss";
 import { ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
 import { LLMChain, loadSummarizationChain } from "langchain/chains";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import fs from 'fs/promises';
 
 dotenv.config();
 
@@ -80,20 +78,6 @@ const queryChain = new LLMChain({ llm: llmModel, prompt: queryPromptTemplate });
 
 const vectorStoreCache = new Map();
 const previousInteractionsCache = new Map();
-const fullContentCache = new Map();
-
-async function loadFullContent(modelID) {
-  if (!fullContentCache.has(modelID)) {
-    try {
-      const content = await fs.readFile(`./${modelID}/source.txt`, 'utf-8');
-      fullContentCache.set(modelID, content);
-    } catch (error) {
-      console.error(`Error loading full content for ${modelID}:`, error);
-      throw error;
-    }
-  }
-  return fullContentCache.get(modelID);
-}
 
 const queryAnalysisPrompt = `
 Analyze the given query and determine if it requires full document context or if a partial context would suffice. 
@@ -102,8 +86,10 @@ Consider the following factors:
 2. Does the query require comparing or connecting information from different parts of the document?
 3. Is the query about a specific detail that's likely to be found in a small section of the document?
 4. Does the query ask about trends, patterns, or themes throughout the document?
+5. Is this the first query in the session or does it ask for keywords?
 
 Query: {query}
+Is First Query: {is_first_query}
 
 Based on your analysis, respond with either "FULL" for full document context or "PARTIAL" for partial context. Explain your reasoning briefly.
 
@@ -113,22 +99,22 @@ REASONING: [Your explanation here]
 `;
 
 const queryAnalysisTemplate = new PromptTemplate({
-  inputVariables: ["query"],
+  inputVariables: ["query", "is_first_query"],
   template: queryAnalysisPrompt,
 });
 
 const queryAnalysisChain = new LLMChain({ llm: llmModel, prompt: queryAnalysisTemplate });
 
-async function determineQueryScope(query) {
-  const analysis = await queryAnalysisChain.call({ query });
+async function determineQueryScope(query, isFirstQuery) {
+  const analysis = await queryAnalysisChain.call({ query, is_first_query: isFirstQuery.toString() });
   const lines = analysis.text.split('\n').map(line => line.trim());
   
-  let decision = 'PARTIAL'; // Default to PARTIAL if we can't determine
+  let decision = 'PARTIAL';
   let reasoning = '';
 
   for (const line of lines) {
     if (line.toLowerCase().includes('decision:')) {
-      const cleanedLine = line.replace(/[*]/g, '').trim(); // Remove asterisks
+      const cleanedLine = line.replace(/[*]/g, '').trim();
       const parts = cleanedLine.split(':');
       if (parts.length > 1) {
         const decisionPart = parts[1].trim().toUpperCase();
@@ -148,6 +134,7 @@ async function determineQueryScope(query) {
 
   return decision === 'FULL';
 }
+
 app.post('/query', async (req, res) => {
   const { modelID, query, sessionID } = req.body;
 
@@ -161,50 +148,56 @@ app.post('/query', async (req, res) => {
       console.log(`Loading vector store for model: ${modelID}...`);
       vectorStore = await FaissStore.load(`./${modelID}`, embeddingModel);
       vectorStoreCache.set(modelID, vectorStore);      
-
       console.log("Vector store loaded and cached successfully.");
     }
 
     let previousInteractions = previousInteractionsCache.get(sessionID) || [];
+    const isFirstQuery = previousInteractions.length === 0;
 
     let response;
     let content;
 
-    const requiresFullContent = await determineQueryScope(query);
+    const requiresFullContent = await determineQueryScope(query, isFirstQuery);
 
     if (requiresFullContent) {
       console.log("Query requires full content. Retrieving full content for processing...");
       const similaritySearchResults = await vectorStore.similaritySearch("", 2000);
       content = similaritySearchResults.map(doc => doc.pageContent).join('\n\n');
-      console.log(content)
+      console.log("Full content retrieved. Length:", content.length);
+
       const textSplitter = new RecursiveCharacterTextSplitter({
-        chunkSize:10000,
-        chunkOverlap:20
+        chunkSize: 10000,
+        chunkOverlap: 20
       });
       const docs = await textSplitter.createDocuments([content]);
+      console.log(docs)
       const chain = loadSummarizationChain(llmModel, { type: "map_reduce" });
-      response = await chain.invoke({
+      const summaryResult = await chain.invoke({
         input_documents: docs,
+      });
+
+      response = await queryChain.call({
+        document_data: summaryResult.text,
+        previous_interactions: previousInteractions.map((interaction, index) => 
+          `${index + 1}. Q: ${interaction.query}\nA: ${interaction.response}`).join('\n\n'),
+        query: query,
       });
     } else {
       console.log("Query can be answered with partial content. Performing similarity search...");
       const similaritySearchResults = await vectorStore.similaritySearch(query, 5);
       content = similaritySearchResults.map(doc => doc.pageContent).join('\n\n');
       const formattedPreviousInteractions = previousInteractions
-      .map((interaction, index) => `${index + 1}. Q: ${interaction.query}\nA: ${interaction.response}`)
-      .join('\n\n');
+        .map((interaction, index) => `${index + 1}. Q: ${interaction.query}\nA: ${interaction.response}`)
+        .join('\n\n');
 
-    console.log("Running the query LLM chain...");
-    response = await queryChain.call({
-      document_data: content,
-      previous_interactions: formattedPreviousInteractions,
-      query: query,
-    });
+      console.log("Running the query LLM chain...");
+      response = await queryChain.call({
+        document_data: content,
+        previous_interactions: formattedPreviousInteractions,
+        query: query,
+      });
     }
 
-    console.log("Content retrieved. Length:", content.length);
-
-    
     console.log("Query chain execution completed.");
 
     previousInteractions.push({ query, response: response.text });
