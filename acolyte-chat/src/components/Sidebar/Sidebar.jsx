@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import './Sidebar.css';
 import { Menu, CircleHelp, Settings, History, Database, Link } from 'lucide-react';
-import { Context } from "../../context/Context.jsx";
+import { Context } from "../../context/context";
 
 const Sidebar = () => {
     const [extended, setExtended] = useState(false);
@@ -87,16 +87,11 @@ const Sidebar = () => {
             </div>
             <div className="bottom">
                 <div className="bottom-item">
+                <a href="https://www.myacolyte.in/contact" className="bottom-item" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}>
+
                     <CircleHelp />
                     {extended && <p>Help</p>}
-                </div>
-                <div className="bottom-item">
-                    <History />
-                    {extended && <p>Activity</p>}
-                </div>
-                <div className="bottom-item">
-                    <Settings />
-                    {extended && <p>Settings</p>}
+                    </a>
                 </div>
             </div>
         </div>
