@@ -1,6 +1,6 @@
 import React, { createContext, useState, useCallback, useEffect } from "react";
 import { v4 as uuidv4 } from 'uuid';
-import Dialog from './Dialog'; // Assuming the Dialog component is in the same directory
+import Dialog from "../components/Dialog";
 
 export const Context = createContext();
 
