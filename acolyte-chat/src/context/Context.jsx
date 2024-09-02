@@ -91,7 +91,7 @@ const ContextProvider = (props) => {
 
             console.log("Sending chat request with input:", input, "model:", modelToUse, "and sessionId:", sessionId);
             
-            const response = await fetch('http://localhost:3000/query', {
+            const response = await fetch('https://acolytecompanion.onrender.com/query', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
