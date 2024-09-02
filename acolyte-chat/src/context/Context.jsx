@@ -189,11 +189,9 @@ const ContextProvider = (props) => {
                             <li>GPU initialization: Preparing CUDA cores (if applicable)</li>
                             <li>Cache warming: Populating model's cache</li>
                         </ul>
-                        <p>Loading progress: ${loadingProgress}%</p>
-                        <div style="width: 100%; background-color: #e0e0e0; border-radius: 4px;">
-                            <div style="width: ${loadingProgress}%; height: 20px; background-color: #4CAF50; border-radius: 4px; transition: width 0.5s;"></div>
-                        </div>
-                        <p><strong>Note:</strong> This is a demo version. In a production environment, interactions would be significantly faster after the initial load.</p>
+                        
+                        <p><strong>Note:</strong> This is a demo version. <br>
+                        In a production environment, interactions would be significantly faster after the initial load.</p>
                     </div>
                 `}
             />
