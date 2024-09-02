@@ -1,21 +1,40 @@
-import { createContext, useState, useCallback, useEffect } from "react";
-import { v4 as uuidv4 } from 'uuid'; // Import UUID library for generating session IDs
+import React, { createContext, useState, useCallback, useEffect } from "react";
+import { v4 as uuidv4 } from 'uuid';
+import Dialog from './Dialog'; // Assuming the Dialog component is in the same directory
 
 export const Context = createContext();
 
 const ContextProvider = (props) => {
     const [chatSessions, setChatSessions] = useState({});
-    const [currentModel, setCurrentModel] = useState("pdf_test1"); // Set default model
+    const [currentModel, setCurrentModel] = useState("pdf_test1");
     const [loading, setLoading] = useState(false);
     const [displayedResponse, setDisplayedResponse] = useState("");
-    const [sessionId, setSessionId] = useState(""); // New state for session ID
+    const [sessionId, setSessionId] = useState("");
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isFirstQuery, setIsFirstQuery] = useState(true);
+    const [loadingProgress, setLoadingProgress] = useState(0);
 
     useEffect(() => {
-        // Initialize the default session when the component mounts
-        const newSessionId = uuidv4(); // Generate a new session ID
+        const newSessionId = uuidv4();
         setSessionId(newSessionId);
         createNewSession("pdf_test1", newSessionId);
     }, []);
+
+    useEffect(() => {
+        let intervalId;
+        if (isDialogOpen) {
+            intervalId = setInterval(() => {
+                setLoadingProgress((prevProgress) => {
+                    if (prevProgress >= 100) {
+                        clearInterval(intervalId);
+                        return 100;
+                    }
+                    return prevProgress + 10;
+                });
+            }, 500);
+        }
+        return () => clearInterval(intervalId);
+    }, [isDialogOpen]);
 
     const createNewSession = (modelId, newSessionId = uuidv4()) => {
         setChatSessions(prev => ({
@@ -24,11 +43,12 @@ const ContextProvider = (props) => {
                 prompts: [],
                 responses: [],
                 currentInput: "",
-                sessionId: newSessionId // Store session ID for each model
+                sessionId: newSessionId
             }
         }));
         setCurrentModel(modelId);
-        setSessionId(newSessionId); // Update the current session ID
+        setSessionId(newSessionId);
+        setIsFirstQuery(true);
     };
 
     const updateCurrentInput = (input) => {
@@ -50,10 +70,15 @@ const ContextProvider = (props) => {
     }, []);
 
     const processQuery = async (input) => {
-        const modelToUse = currentModel || "pdf_test1"; // Use default if no model selected
+        const modelToUse = currentModel || "pdf_test1";
 
         setLoading(true);
         setDisplayedResponse("");
+        
+        if (isFirstQuery) {
+            setIsDialogOpen(true);
+            setLoadingProgress(0);
+        }
 
         try {
             setChatSessions(prev => ({
@@ -66,8 +91,7 @@ const ContextProvider = (props) => {
 
             console.log("Sending chat request with input:", input, "model:", modelToUse, "and sessionId:", sessionId);
             
-            // API call with session ID
-            const response = await fetch('https://acolytecompanion.onrender.com/query', {
+            const response = await fetch('http://localhost:3000/query', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -75,7 +99,7 @@ const ContextProvider = (props) => {
                 body: JSON.stringify({
                     modelID: modelToUse,
                     query: input,
-                    sessionID: sessionId // Include session ID in the request
+                    sessionID: sessionId
                 }),
             });
 
@@ -90,7 +114,6 @@ const ContextProvider = (props) => {
                 throw new Error("Unexpected response type from API");
             }
 
-            // Modified formatting: Move bold text to next line and replace other asterisks with line breaks
             const formattedResponse = data.result.replace(/\*\*(.*?)\*\*/g, '</br><b>$1</b></br>').replace(/\*/g, '</br>');
 
             setChatSessions(prev => ({
@@ -117,6 +140,10 @@ const ContextProvider = (props) => {
             }));
         } finally {
             setLoading(false);
+            setIsDialogOpen(false);
+            if (isFirstQuery) {
+                setIsFirstQuery(false);
+            }
         }
     };
 
@@ -143,12 +170,33 @@ const ContextProvider = (props) => {
         sendCardQuery,
         loading,
         displayedResponse,
-        sessionId // Expose session ID through context
+        sessionId
     };
 
     return (
         <Context.Provider value={contextValue}>
             {props.children}
+            <Dialog 
+                isOpen={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                title="Initializing Language Model"
+                content={`
+                    <div>
+                        <p>The large language model is currently being initialized. This process may take a few moments due to the following technical reasons:</p>
+                        <ul>
+                            <li>Model size: Loading billions of parameters</li>
+                            <li>Memory allocation: Optimizing RAM usage</li>
+                            <li>GPU initialization: Preparing CUDA cores (if applicable)</li>
+                            <li>Cache warming: Populating model's cache</li>
+                        </ul>
+                        <p>Loading progress: ${loadingProgress}%</p>
+                        <div style="width: 100%; background-color: #e0e0e0; border-radius: 4px;">
+                            <div style="width: ${loadingProgress}%; height: 20px; background-color: #4CAF50; border-radius: 4px; transition: width 0.5s;"></div>
+                        </div>
+                        <p><strong>Note:</strong> This is a demo version. In a production environment, interactions would be significantly faster after the initial load.</p>
+                    </div>
+                `}
+            />
         </Context.Provider>
     );
 };
