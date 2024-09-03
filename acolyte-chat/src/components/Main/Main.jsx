@@ -77,11 +77,11 @@ const Main = ({ onMainClick }) => {
     return (
         <div className="main" onClick={onMainClick}>
             <div className="nav">
-                <p>Acolite</p>
+                <p>Acolyte</p>
             </div>
             <div className="main-container">
                 {!showResults ? (
-                    <>
+                    <div className="result">
                         <div className="greet">
                             <p><span>Hello, to be Doctor.</span></p>
                             <p>How can I be your companion?</p>
@@ -94,7 +94,7 @@ const Main = ({ onMainClick }) => {
                                 </div>
                             ))}
                         </div>
-                    </>
+                    </div>
                 ) : (
                     <div className="result" ref={resultRef}>
                         {currentSession.prompts.map((prompt, index) => (
