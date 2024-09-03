@@ -4,7 +4,7 @@ import Notebook from '../../assets/notebook-tabs.png'
 import './Main.css'
 import { Context } from "../../context/Context.jsx";
 
-const Main = () => {
+const Main = ({ onMainClick }) => {
     const { 
         chatSessions, 
         currentModel, 
@@ -75,9 +75,9 @@ const Main = () => {
     const currentCards = modelCards[currentModel] || modelCards.pdf_test1;
 
     return (
-        <div className="main">
+        <div className="main" onClick={onMainClick}>
             <div className="nav">
-                <p>Acolyte</p>
+                <p>Acolite</p>
             </div>
             <div className="main-container">
                 {!showResults ? (
