@@ -39,6 +39,7 @@ body {
     z-index: 0;
 }
 
+
 .main .nav {
     display: flex;
     align-items: center;
@@ -182,7 +183,7 @@ body {
 .main-bottom {
     position: absolute;
     bottom: 35PX;
-    left: 45%;
+    left: 42%;
     transform: translateX(-50%);
     width: 100%;
     max-width: 900px;
