@@ -1,10 +1,10 @@
+
 import React, { useContext, useState } from "react";
 import './Sidebar.css';
 import { Menu, CircleHelp, Settings, History, Database, Link } from 'lucide-react';
 import { Context } from "../../context/Context.jsx";
 
-const Sidebar = () => {
-    const [extended, setExtended] = useState(false);
+const Sidebar = ({ extended, setExtended }) => {
     const [activePopup, setActivePopup] = useState(null);
     const { createNewSession } = useContext(Context);
 
@@ -28,6 +28,8 @@ const Sidebar = () => {
 
     const handleModelSelect = (modelId) => {
         createNewSession(modelId);
+        setExtended(false); // Close the sidebar when a model is selected
+
     };
 
     const handlePopupToggle = (id) => {
@@ -54,6 +56,7 @@ const Sidebar = () => {
                                         className="rag-model-entry"
                                         onClick={() => handleModelSelect(model.id)}
                                     >
+                                    
                                         <Database size={18} />
                                         <p>{model.name}</p>
                                         <div 
