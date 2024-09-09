@@ -141,23 +141,6 @@ body {
 }
 
 .main .card .img {
-
-    
-          
-            
-    
-
-          
-          Expand Down
-          
-            
-    
-
-          
-          Expand Up
-    
-    @@ -182,16 +178,16 @@ body {
-  
     width: 35px;
     height: 35px;
     padding: 6px;
@@ -206,23 +189,6 @@ body {
 }
 
 .search-box {
-
-    
-          
-            
-    
-
-          
-          Expand Down
-          
-            
-    
-
-          
-          Expand Up
-    
-    @@ -461,3 +457,23 @@ body {
-  
     display: flex;
     align-items: center;
     justify-content: space-between;
