@@ -39,7 +39,6 @@ body {
     z-index: 0;
 }
 
-
 .main .nav {
     display: flex;
     align-items: center;
@@ -182,8 +181,8 @@ body {
  
 .main-bottom {
     position: absolute;
-    bottom: 35PX;
-    left: 42%;
+    bottom: 35px;
+    left: 50%;
     transform: translateX(-50%);
     width: 100%;
     max-width: 900px;
@@ -225,7 +224,6 @@ body {
     align-items: center;
     justify-content: center;
 }
-
 
 .bottom-info:hover {
     background-color: #d6eaf8;
@@ -383,98 +381,3 @@ body {
     .main .cards {
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     }
-    
-    .search-box {
-        max-width: 80%;
-        width: 100%;
-        margin: 0 auto;
-    }
-}
-
-@media (max-width: 768px) {
-    body {
-        font-size: 14px;
-    }
-    
-    .main .greet {
-        font-size: 2.5rem;
-    }
-    
-    .main .cards {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 20px;
-    }
-    
-    .search-box {
-        max-width: 90%;
-        padding: 8px 12px;
-        margin: 0 auto;
-    }
-    
-    .search-box input {
-        font-size: 0.9rem;
-        width: 100%;
-    }
-    
-     .main-bottom {
-        padding: 20px 10px;
-        padding-left: 60px;
-    }
-}
-
-@media (max-width: 480px) {
-    .main .greet {
-        font-size: 2rem;
-        padding: 10px;
-    }
-    
-    .main .cards {
-        grid-template-columns: 1fr;
-    }
-    
-    .main .card {
-        height: auto;
-        min-height: 120px;
-    }
-    
-    .search-box {
-        max-width: 95%;
-        padding: 6px 10px;
-        margin: 0 auto;
-    }
-    
-    .search-box input {
-        font-size: 0.875rem;
-        width: 100%;
-    }
-    
-    .result-title p {
-        font-size: 1rem;
-    }
-    
-    .result-data p {
-        font-size: 0.875rem;
-    }
-    
-
-}
-@media (max-width: 768px) {
-    .main .cards {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 20px;
-    }
-    
-    .main .card {
-        min-height: 120px;
-    }
-}
-
-@media (max-width: 480px) {
-    .main .cards {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    }
-    
-    .main .card {
-        min-height: 100px;
-    }
-}
