@@ -133,7 +133,6 @@ const Main = ({ onMainClick }) => {
                         </button>
                     </div>
                 </div>
-           
         </div>
     )
 }
