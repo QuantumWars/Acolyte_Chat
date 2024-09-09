@@ -46,11 +46,11 @@ function App() {
         <Main onMainClick={handleMainClick} />
         
       </div>
-      <div className='bottom-info'>
+{/*       <div className='bottom-info'>
           <p>
             <strong>Waitlist Demo:</strong> Experience the future of medical education. Join our waitlist to be notified when full access becomes available!
           </p>
-        </div>
+        </div> */}
       <Dialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
