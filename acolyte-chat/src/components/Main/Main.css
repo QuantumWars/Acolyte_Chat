@@ -14,14 +14,12 @@ body {
     background-color: var(--main-bg);
     font-family: 'Arial', sans-serif;
     font-size: 16px;
-    margin: 0;
-    padding: 0;
 }
 
 .main {
     flex: 1;
     min-height: 100vh;
-    padding-bottom: 120px; /* Increased padding to make room for search box and disclaimer */
+    padding-bottom: 10vh;
     position: relative;
     background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
     overflow-x: hidden;
@@ -38,6 +36,7 @@ body {
     opacity: 0.05;
     z-index: 0;
 }
+
 
 .main .nav {
     display: flex;
@@ -80,7 +79,7 @@ body {
 .main-container {
     max-width: 1000px;
     margin: auto;
-    padding: 10px 10px 80px; /* Increased bottom padding */
+    padding: 10px;
     position: relative;
     z-index: 1;
 }
@@ -178,15 +177,16 @@ body {
     transform: rotate(0deg) scale(1.1);
     opacity: 0.15;
 }
-
+ 
 .main-bottom {
-    position: fixed; /* Changed from absolute to fixed */
-    bottom: 70px; /* Moved up to make room for disclaimer */
-    left: 0;
-    right: 0;
+    position: absolute;
+    bottom: 35PX;
+    left: 42%;
+    transform: translateX(-50%);
     width: 100%;
+    max-width: 900px;
     padding: 0px 15px;
-    z-index: 10; /* Increased z-index to ensure it's above other content */
+    z-index: 1;
 }
 
 .search-box {
@@ -195,8 +195,9 @@ body {
     justify-content: space-between;
     gap: 15px;
     background-color: rgba(255, 255, 255, 0.9);
-    padding: 8px 15px;
+    padding: 8px 20px;
     border-radius: 25px;
+    margin-bottom: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 600px;
@@ -222,6 +223,7 @@ body {
     align-items: center;
     justify-content: center;
 }
+
 
 .bottom-info:hover {
     background-color: #d6eaf8;
@@ -373,7 +375,7 @@ body {
 /* Responsive adjustments */
 @media (max-width: 1024px) {
     .main-container {
-        padding: 20px 20px 100px; /* Increased bottom padding */
+        padding: 20px 20px;
     }
     
     .main .cards {
@@ -382,6 +384,8 @@ body {
     
     .search-box {
         max-width: 80%;
+        width: 100%;
+        margin: 0 auto;
     }
 }
 
@@ -390,10 +394,6 @@ body {
         font-size: 14px;
     }
     
-    .main {
-        padding-bottom: 140px; /* Further increased for smaller screens */
-    }
-
     .main .greet {
         font-size: 2.5rem;
     }
@@ -403,21 +403,48 @@ body {
         gap: 20px;
     }
     
-    .main .card {
-        min-height: 120px;
-    }
-    
-    .main-bottom {
-        bottom: 80px; /* Adjusted for smaller screens */
-    }
-
     .search-box {
         max-width: 90%;
         padding: 8px 12px;
+        margin: 0 auto;
     }
     
     .search-box input {
         font-size: 0.9rem;
+        width: 100%;
+    }
+    
+     .main-bottom {
+        padding: 20px 10px;
+        padding-left: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main .greet {
+        font-size: 2rem;
+        padding: 10px;
+    }
+    
+    .main .cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .main .card {
+        height: auto;
+        min-height: 120px;
+    }
+    
+    .search-box {
+        max-width: 95%;
+        padding: 6px 10px;
+        margin: 0 auto;
+        margin-bottom: 10px;
+    }
+    
+    .search-box input {
+        font-size: 0.875rem;
+        width: 100%;
     }
     
     .result-title p {
@@ -427,36 +454,26 @@ body {
     .result-data p {
         font-size: 0.875rem;
     }
+    
+
+}
+@media (max-width: 768px) {
+    .main .cards {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 20px;
+    }
+    
+    .main .card {
+        min-height: 120px;
+    }
 }
 
 @media (max-width: 480px) {
-    .main {
-        padding-bottom: 160px; /* Even more padding for very small screens */
-    }
-
-    .main .greet {
-        font-size: 2rem;
-        padding: 10px;
-    }
-    
     .main .cards {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
     
     .main .card {
         min-height: 100px;
-    }
-    
-    .main-bottom {
-        bottom: 90px; /* Further adjusted for very small screens */
-    }
-
-    .search-box {
-        max-width: 95%;
-        padding: 6px 10px;
-    }
-    
-    .search-box input {
-        font-size: 0.875rem;
     }
 }
